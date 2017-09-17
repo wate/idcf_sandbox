@@ -1,6 +1,4 @@
 
-# Created by https://www.gitignore.io/api/vagrant,terraform
-
 ### Terraform ###
 # Compiled files
 *.tfstate
@@ -14,4 +12,5 @@
 ### Vagrant ###
 .vagrant/
 
-# End of https://www.gitignore.io/api/vagrant,terraform
+### Ansible ###
+*.retry

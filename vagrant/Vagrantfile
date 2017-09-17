@@ -1,0 +1,89 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+
+# 「`create_port_forwarding_rule': undefined method `id' for nil:NilClass (NoMethodError)」って出て
+# 使えねぇっす・・
+
+ENV['VAGRANT_DEFAULT_PROVIDER'] = 'cloudstack'
+
+Vagrant.configure("2") do |config|
+
+  config.vm.synced_folder ".", "/vagrant"
+
+  config.vm.provider :cloudstack do |cloudstack, override|
+    override.vm.box = "dummy"
+    override.vm.box_url = 'https://github.com/klarna/vagrant-cloudstack/raw/master/dummy.box'
+
+    cloudstack.instance_ready_timeout = 1800
+
+    cloudstack.api_key = ENV['CLOUDSTACK_KEY'] || 'YOUR API KEY'
+    cloudstack.secret_key = ENV['CLOUDSTACK_SECRET'] || 'YOUR SECRET KEY'
+
+
+    cloudstack.scheme = 'https'
+    # 東日本:compute.jp-east.idcfcloud.com
+    # 東日本2:compute.jp-east-2.idcfcloud.com
+    # 西日本:compute.jp-west.idcfcloud.com
+    cloudstack.host = 'compute.jp-east.idcfcloud.com'
+    cloudstack.path = '/client/api'
+
+    # マシン名
+    cloudstack.display_name = 'MachineName'
+    # グループ名
+    cloudstack.group = 'vagrant'
+
+    cloudstack.private_ip_address = '10.11.0.100'
+
+    # A simple, yet powerful CloudStack API client for python and the command-line.
+    # https://github.com/exoscale/cs
+    # ```
+    # pip install cs
+    # ```
+    #
+    # 利用可能API一覧
+    # ```
+    # cs listApis|jq  -c '.api[] | {"name":.name, "description":.description}'
+    # ```
+
+    # ゾーン一覧
+    # ```
+    # cs listZones | jq -c '.zone[] | {"id":.id, "name":.name}'
+    # ```
+    cloudstack.zone_name = 'newton'
+
+    # テンプレート一覧
+    # ```
+    # cs listTemplates \
+    #   templatefilter=featured \
+    #   [zoneid=<zone_id> \]
+    #   [keyword=<keyword> \]
+    #   | jq -c '.template[] | {"id":.id, "name":.name, "zonename":.zonename}'
+    # ```
+    cloudstack.template_name = 'CentOS 7.3 64-bit for Vagrant'
+
+    # サービスオファリング一覧
+    # ```
+    # cs listServiceOfferings | jq -c '.serviceoffering[] | {"id":.id, "name":.name, "displaytext":.displaytext}'
+    # ```
+    cloudstack.service_offering_name = 'light.S1'
+
+    # SSHキー一覧
+    # ```
+    # cs listSSHKeyPairs | jq -c '.sshkeypair[] | {"name": .name}'
+    # ```
+    cloudstack.keypair = 'vagrant'
+
+    # パブリックIPアドレス一覧
+    # ```
+    # cs listPublicIpAddresses | jq -c '.publicipaddress[] | {"id":.id, "ipaddress":.ipaddress, "zonename":.zonename}'
+    # ```
+    cloudstack.pf_ip_address = '123.123.123.123'
+    cloudstack.pf_public_port = '22'
+    cloudstack.pf_private_port = '22'
+
+    # override.ssh.username = 'vagrant'
+    # override.ssh.port = '22'
+    override.ssh.private_key_path = File.expand_path('~/.ssh/vagrant')
+  end
+end
